@@ -12,6 +12,12 @@ var (
 	mu sync.Mutex
 )
 
+func main() {
+	http.HandleFunc("/status", statusHandler)
+	http.HandleFunc("/assignment", assignmentHandler)
+	http.ListenAndServe(":8080", nil)
+}
+
 func assignmentHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Only POST allowed", 400)
@@ -47,10 +53,4 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Fprint(w, "reject")
 	}
-}
-
-func main() {
-	http.HandleFunc("/status", statusHandler)
-	http.HandleFunc("/assignment", assignmentHandler)
-	http.ListenAndServe(":8080", nil)
 }
