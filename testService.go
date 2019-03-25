@@ -7,12 +7,12 @@ import (
 	"sync"
 )
 
-var data bool
-var mux sync.Mutex
+var (
+	data bool
+	mu sync.Mutex
+)
 
 func assignmentHandler(w http.ResponseWriter, r *http.Request) {
-	mux.Lock()
-	defer mux.Unlock()
 	if r.Method != "POST" {
 		http.Error(w, "Only POST allowed", 400)
 		return
@@ -23,6 +23,8 @@ func assignmentHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Unexpected error on data reading", 400)
 		return
 	}
+	mu.Lock()
+	defer mu.Unlock()
 	switch string(body) {
 	case "accept":
 		data = true
@@ -34,12 +36,12 @@ func assignmentHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func statusHandler(w http.ResponseWriter, r *http.Request) {
-	mux.Lock()
-	defer mux.Unlock()
 	if r.Method != "" && r.Method != "GET" {
 		http.Error(w, "Only GET allowed", 400)
 		return
 	}
+	mu.Lock()
+	defer mu.Unlock()
 	if data {
 		fmt.Fprint(w, "accept")
 	} else {
