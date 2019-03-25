@@ -4,17 +4,21 @@ import (
 	"fmt"
 	"net/http"
 	"io"
+	"sync"
 )
 
 var data bool
+var mux sync.Mutex
 
 func assignmentHandler(w http.ResponseWriter, r *http.Request) {
+	mux.Lock()
+	defer mux.Unlock()
 	if r.Method != "POST" {
 		http.Error(w, "Only POST allowed", 400)
 		return
 	}
 	var body []byte = make([]byte, 6)
-	n, err := r.Body.Read(body)
+	_, err := r.Body.Read(body)
 	if err != nil && err != io.EOF {
 		http.Error(w, "Unexpected error on data reading", 400)
 		return
@@ -30,6 +34,8 @@ func assignmentHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func statusHandler(w http.ResponseWriter, r *http.Request) {
+	mux.Lock()
+	defer mux.Unlock()
 	if r.Method != "" && r.Method != "GET" {
 		http.Error(w, "Only GET allowed", 400)
 		return
